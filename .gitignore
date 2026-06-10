@@ -1,0 +1,18 @@
+# Env files
+.env
+.env.*
+!.env.example
+
+# Docker overrides
+docker-compose.override.yml
+
+# Local configs (mounted volumes)
+config/**
+
+# Downloads & media (never commit these)
+downloads/**
+media/**
+
+# Temp / cache
+tmp/
+cache/

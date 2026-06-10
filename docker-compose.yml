@@ -1,0 +1,130 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    user: "1000:1000"
+    ports:
+      - "8096:8096"
+      - "7359:7359/udp"
+    volumes:
+      - /home/patrick/mediaserver/config/jellyfin/config:/config
+      - /home/patrick/mediaserver/config/jellyfin/cache:/cache
+      - /home/patrick/mediaserver/media:/media:ro
+    networks: [media]
+    restart: unless-stopped
+
+  seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    container_name: seerr
+    init: true
+    environment:
+      - TZ=America/Sao_Paulo
+    ports:
+      - "5055:5055"
+    volumes:
+      - /home/patrick/mediaserver/config/seerr/config:/app/config
+    networks: [media]
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+      - WEBUI_PORT=8080
+    ports:
+      - "8080:8080"
+      - "6881:6881"
+      - "6881:6881/udp"
+    volumes:
+      - /home/patrick/mediaserver/config/qbittorrent/config:/config
+      - /home/patrick/mediaserver/downloads:/downloads
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048M
+        reservations:
+          memory: 1024M
+    networks: [media]
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+    ports:
+      - "8989:8989"
+    volumes:
+      - /home/patrick/mediaserver/config/sonarr/config:/config
+      - /home/patrick/mediaserver/media:/media
+      - /home/patrick/mediaserver/downloads:/downloads
+    networks: [media]
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+    ports:
+      - "7878:7878"
+    volumes:
+      - /home/patrick/mediaserver/config/radarr/config:/config
+      - /home/patrick/mediaserver/media:/media
+      - /home/patrick/mediaserver/downloads:/downloads
+    networks: [media]
+    restart: unless-stopped
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+    volumes:
+      - /home/patrick/mediaserver/config/bazarr/config:/config
+      - /home/patrick/mediaserver/media/movies:/movies
+      - /home/patrick/mediaserver/media/tv:/tv
+    ports:
+      - "6767:6767"
+    networks: [media]
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+    ports:
+      - "9696:9696"
+    volumes:
+      - /home/patrick/mediaserver/config/prowlarr/config:/config
+    networks: [media]
+    restart: unless-stopped
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - TZ=America/Sao_Paulo
+    ports:
+      - "8191:8191"
+    networks: [media]
+    restart: unless-stopped
+
+networks:
+  media:
+    external: true
+    name: media_net
